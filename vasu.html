@@ -1,0 +1,1086 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Student Performance Analytics</title>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<style>
+:root {
+    --primary: #5b5ce2;
+    --primary-light: #eeeeff;
+    --background: #f5f6fb;
+    --surface: #ffffff;
+    --text: #20243a;
+    --muted: #858ba5;
+    --border: #eceef5;
+    --green: #159b72;
+    --shadow: 0 8px 30px rgba(30, 40, 90, .045);
+}
+
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    font-family: Inter, "Segoe UI", Arial, sans-serif;
+    background: var(--background);
+    color: var(--text);
+}
+
+button, input {
+    font: inherit;
+}
+
+.app {
+    display: flex;
+    min-height: 100vh;
+}
+
+.sidebar {
+    width: 245px;
+    flex-shrink: 0;
+    background: var(--surface);
+    border-right: 1px solid var(--border);
+    padding: 27px 17px;
+}
+
+.brand {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 0 10px 35px;
+    font-size: 17px;
+    font-weight: 800;
+}
+
+.brand-icon {
+    width: 39px;
+    height: 39px;
+    display: grid;
+    place-items: center;
+    border-radius: 12px;
+    color: white;
+    background: linear-gradient(135deg, #7777f8, #4a49ce);
+    font-size: 20px;
+}
+
+.nav-title {
+    padding: 0 12px;
+    color: var(--muted);
+    font-size: 10px;
+    font-weight: 800;
+    letter-spacing: 1.5px;
+    margin: 12px 0;
+}
+
+.nav-item {
+    display: flex;
+    gap: 13px;
+    align-items: center;
+    padding: 13px 14px;
+    margin: 5px 0;
+    border-radius: 10px;
+    color: #737a96;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: .2s;
+}
+
+.nav-item:hover, .nav-item.active {
+    background: var(--primary-light);
+    color: var(--primary);
+}
+
+.nav-item .icon {
+    font-size: 18px;
+    width: 22px;
+    text-align: center;
+}
+
+.sidebar-bottom {
+    margin: 55px 4px 0;
+    padding: 17px;
+    border-radius: 13px;
+    background: #f7f7ff;
+    font-size: 12px;
+    line-height: 1.6;
+    color: #747a9a;
+}
+
+.sidebar-bottom strong {
+    color: var(--text);
+}
+
+.main {
+    flex: 1;
+    min-width: 0;
+}
+
+.topbar {
+    height: 78px;
+    padding: 0 35px;
+    background: white;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 15px;
+}
+
+.search {
+    width: min(320px, 48%);
+    border: 1px solid var(--border);
+    background: #fafbfe;
+    border-radius: 10px;
+    padding: 11px 14px;
+    outline: none;
+}
+
+.profile {
+    display: flex;
+    align-items: center;
+    gap: 11px;
+    font-size: 12px;
+}
+
+.avatar {
+    width: 38px;
+    height: 38px;
+    border-radius: 50%;
+    background: #e6e6ff;
+    display: grid;
+    place-items: center;
+    color: var(--primary);
+    font-weight: 800;
+}
+
+.content {
+    max-width: 1500px;
+    padding: 30px 35px;
+    margin: auto;
+}
+
+.page-heading {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 20px;
+    flex-wrap: wrap;
+    margin-bottom: 27px;
+}
+
+.page-heading h1 {
+    margin: 0 0 8px;
+    font-size: 26px;
+    letter-spacing: -.7px;
+}
+
+.subtitle {
+    margin: 0;
+    color: var(--muted);
+    font-size: 13px;
+}
+
+.date-label {
+    background: white;
+    border: 1px solid var(--border);
+    padding: 12px 15px;
+    border-radius: 10px;
+    font-size: 12px;
+    color: #606782;
+}
+
+.stats {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 18px;
+    margin-bottom: 22px;
+}
+
+.stat-card, .panel {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 15px;
+    box-shadow: var(--shadow);
+}
+
+.stat-card {
+    padding: 21px;
+}
+
+.stat-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    color: var(--muted);
+    font-size: 12px;
+    gap: 8px;
+}
+
+.stat-icon {
+    width: 37px;
+    height: 37px;
+    border-radius: 11px;
+    display: grid;
+    place-items: center;
+    font-size: 19px;
+}
+
+.purple { background: #eeeeff; color: #6464df; }
+.green { background: #e5f8f0; color: #159b72; }
+.orange { background: #fff1df; color: #d88825; }
+.blue { background: #e7f2ff; color: #3d8bdc; }
+
+.stat-value {
+    margin: 17px 0 8px;
+    font-size: 29px;
+    font-weight: 800;
+    letter-spacing: -.7px;
+}
+
+.stat-note {
+    font-size: 11px;
+    color: var(--muted);
+}
+
+.stat-note strong {
+    color: var(--green);
+}
+
+.dashboard-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1.4fr) minmax(290px, .9fr);
+    gap: 22px;
+    align-items: start;
+}
+
+.panel {
+    padding: 23px;
+    margin-bottom: 22px;
+    min-width: 0;
+}
+
+.panel-heading {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 22px;
+}
+
+.panel-heading h2 {
+    font-size: 15px;
+    margin: 0 0 6px;
+}
+
+.panel-heading p {
+    margin: 0;
+    font-size: 11px;
+    color: var(--muted);
+}
+
+.pill {
+    background: #f0efff;
+    color: var(--primary);
+    border-radius: 8px;
+    padding: 8px 10px;
+    font-size: 11px;
+    font-weight: 700;
+}
+
+.chart-wrap {
+    height: 245px;
+    position: relative;
+}
+
+.form-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 17px;
+}
+
+.field label {
+    display: block;
+    font-size: 12px;
+    font-weight: 700;
+    margin-bottom: 9px;
+}
+
+.field input {
+    width: 100%;
+    min-width: 0;
+    padding: 12px;
+    border: 1px solid #e3e6f0;
+    background: #fafbfe;
+    border-radius: 9px;
+    outline: none;
+    font-size: 13px;
+}
+
+.field input:focus {
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px #5b5ce218;
+}
+
+.hint {
+    display: block;
+    margin-top: 7px;
+    font-size: 10px;
+    color: var(--muted);
+}
+
+.primary-btn {
+    width: 100%;
+    margin-top: 22px;
+    padding: 14px;
+    border: 0;
+    border-radius: 10px;
+    background: linear-gradient(100deg, #6263e9, #4d4ed0);
+    color: white;
+    font-weight: 700;
+    font-size: 13px;
+    cursor: pointer;
+    box-shadow: 0 5px 12px #5b5ce226;
+}
+
+.primary-btn:hover {
+    filter: brightness(.96);
+}
+
+.result-box {
+    display: none;
+    margin-top: 20px;
+    padding: 20px;
+    text-align: center;
+    border-radius: 13px;
+    background: #f0efff;
+}
+
+.result-box .label {
+    color: #6869bc;
+    font-size: 12px;
+}
+
+.result-value {
+    font-size: 39px;
+    font-weight: 800;
+    color: var(--primary);
+    margin: 9px 0;
+}
+
+.result-message {
+    font-size: 12px;
+    color: #6869bc;
+}
+
+.error {
+    display: none;
+    margin-top: 14px;
+    padding: 12px;
+    background: #fff0f0;
+    color: #b42318;
+    border-radius: 9px;
+    font-size: 12px;
+}
+
+.table-wrap {
+    overflow-x: auto;
+}
+
+table {
+    border-collapse: collapse;
+    width: 100%;
+    text-align: left;
+    white-space: nowrap;
+}
+
+th {
+    color: var(--muted);
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: .7px;
+    padding: 13px 10px;
+    border-bottom: 1px solid var(--border);
+}
+
+td {
+    font-size: 12px;
+    padding: 15px 10px;
+    border-bottom: 1px solid #f0f1f7;
+}
+
+td:first-child {
+    font-weight: 700;
+}
+
+.status {
+    display: inline-block;
+    padding: 6px 9px;
+    background: #e5f8f0;
+    color: #12865f;
+    border-radius: 20px;
+    font-size: 10px;
+    font-weight: 700;
+}
+
+footer {
+    padding: 5px 0 20px;
+    color: var(--muted);
+    font-size: 11px;
+}
+
+@media (max-width: 1100px) {
+    .stats {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .dashboard-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 700px) {
+    .sidebar {
+        width: 66px;
+        padding: 20px 7px;
+    }
+
+    .brand {
+        padding: 0 6px 25px;
+    }
+
+    .brand-name, .nav-title, .nav-text, .sidebar-bottom {
+        display: none;
+    }
+
+    .nav-item {
+        justify-content: center;
+        padding: 13px 5px;
+    }
+
+    .nav-item .icon {
+        width: auto;
+    }
+
+    .topbar {
+        height: 65px;
+        padding: 0 14px;
+    }
+
+    .profile-name {
+        display: none;
+    }
+
+    .content {
+        padding: 22px 14px;
+    }
+
+    .page-heading h1 {
+        font-size: 22px;
+    }
+
+    .stats {
+        gap: 11px;
+    }
+
+    .stat-card {
+        padding: 14px;
+    }
+
+    .stat-value {
+        font-size: 23px;
+    }
+
+    .stat-top {
+        font-size: 11px;
+    }
+
+    .panel {
+        padding: 17px;
+    }
+}
+
+@media (max-width: 390px) {
+    .form-grid {
+        grid-template-columns: 1fr;
+    }
+}
+</style>
+</head>
+
+<body>
+<div class="app">
+
+    <aside class="sidebar">
+        <div class="brand">
+            <div class="brand-icon">S</div>
+            <span class="brand-name">Student<span style="color:#6464df">IQ</span></span>
+        </div>
+
+        <div class="nav-title">MAIN MENU</div>
+
+        <div class="nav-item active" data-section="overview">
+            <span class="icon">▦</span>
+            <span class="nav-text">Dashboard</span>
+        </div>
+
+        <div class="nav-item" data-section="predict">
+            <span class="icon">⌁</span>
+            <span class="nav-text">Predict Performance</span>
+        </div>
+
+        <div class="nav-item" data-section="analytics">
+            <span class="icon">▥</span>
+            <span class="nav-text">Analytics</span>
+        </div>
+
+        <div class="nav-item" data-section="history">
+            <span class="icon">◷</span>
+            <span class="nav-text">Prediction History</span>
+        </div>
+
+        <div class="nav-title" style="margin-top:30px">INFORMATION</div>
+
+        <div class="nav-item" data-section="about">
+            <span class="icon">ⓘ</span>
+            <span class="nav-text">About Project</span>
+        </div>
+
+        <div class="sidebar-bottom">
+            <strong>StudentIQ Dashboard</strong>
+            <br>
+            Academic performance insights in one place.
+        </div>
+    </aside>
+
+    <div class="main">
+        <header class="topbar">
+            <input class="search" id="searchInput"
+                   placeholder="⌕  Search prediction history..."
+                   aria-label="Search prediction history">
+
+            <div class="profile">
+                <div class="avatar">S</div>
+                <div class="profile-name">
+                    <strong>Student Admin</strong>
+                    <div style="color:#858ba5;margin-top:4px">
+                        Performance Portal
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <main class="content">
+            <div class="page-heading" id="overview">
+                <div>
+                    <h1>Dashboard Overview</h1>
+                    <p class="subtitle">
+                        Welcome back! Here's your student performance overview.
+                    </p>
+                </div>
+                <div class="date-label" id="todayDate"></div>
+            </div>
+
+            <section class="stats">
+                <div class="stat-card">
+                    <div class="stat-top">
+                        Total Predictions
+                        <span class="stat-icon purple">⌁</span>
+                    </div>
+                    <div class="stat-value" id="totalPredictions">0</div>
+                    <div class="stat-note">Predictions in this session</div>
+                </div>
+
+                <div class="stat-card">
+                    <div class="stat-top">
+                        Average Predicted Marks
+                        <span class="stat-icon green">↗</span>
+                    </div>
+                    <div class="stat-value" id="averageMarks">--</div>
+                    <div class="stat-note">Across session predictions</div>
+                </div>
+
+                <div class="stat-card">
+                    <div class="stat-top">
+                        Highest Estimate
+                        <span class="stat-icon orange">★</span>
+                    </div>
+                    <div class="stat-value" id="highestMarks">--</div>
+                    <div class="stat-note">Highest predicted score</div>
+                </div>
+
+                <div class="stat-card">
+                    <div class="stat-top">
+                        Model Type
+                        <span class="stat-icon blue">✧</span>
+                    </div>
+                    <div class="stat-value" style="font-size:20px">
+                        Random Forest
+                    </div>
+                    <div class="stat-note">Original Python model not connected</div>
+                </div>
+            </section>
+
+            <div class="dashboard-grid">
+                <div>
+                    <section class="panel" id="analytics">
+                        <div class="panel-heading">
+                            <div>
+                                <h2>Performance Analytics</h2>
+                                <p>Recent predicted marks</p>
+                            </div>
+                            <span class="pill">Live session</span>
+                        </div>
+
+                        <div class="chart-wrap">
+                            <canvas id="performanceChart"></canvas>
+                        </div>
+                    </section>
+
+                    <section class="panel" id="predict">
+                        <div class="panel-heading">
+                            <div>
+                                <h2>Predict Student Performance</h2>
+                                <p>Enter the student's academic details below</p>
+                            </div>
+                            <span class="pill">4 Features</span>
+                        </div>
+
+                        <form id="predictionForm">
+                            <div class="form-grid">
+                                <div class="field">
+                                    <label for="study">Daily Study Hours</label>
+                                    <input id="study" type="number"
+                                           min="0" max="24" step="0.1"
+                                           placeholder="e.g. 5" required>
+                                    <span class="hint">Range: 0–24 hours</span>
+                                </div>
+
+                                <div class="field">
+                                    <label for="attendance">Attendance (%)</label>
+                                    <input id="attendance" type="number"
+                                           min="0" max="100" step="0.1"
+                                           placeholder="e.g. 85" required>
+                                    <span class="hint">Range: 0–100%</span>
+                                </div>
+
+                                <div class="field">
+                                    <label for="previous">Previous Marks (%)</label>
+                                    <input id="previous" type="number"
+                                           min="0" max="100" step="0.1"
+                                           placeholder="e.g. 75" required>
+                                    <span class="hint">Range: 0–100 marks</span>
+                                </div>
+
+                                <div class="field">
+                                    <label for="sleep">Daily Sleep Hours</label>
+                                    <input id="sleep" type="number"
+                                           min="0" max="24" step="0.1"
+                                           placeholder="e.g. 8" required>
+                                    <span class="hint">Range: 0–24 hours</span>
+                                </div>
+                            </div>
+
+                            <button class="primary-btn" type="submit">
+                                ✦ &nbsp; Predict Performance
+                            </button>
+                        </form>
+
+                        <div class="error" id="errorBox" role="alert"></div>
+
+                        <div class="result-box" id="resultBox"
+                             aria-live="polite">
+                            <div class="label">Estimated Final Marks</div>
+                            <div class="result-value" id="resultValue">--</div>
+                            <div class="result-message" id="resultMessage"></div>
+                            <div class="hint" style="margin-top:12px">
+                                Demo estimate only — not a trained ML prediction.
+                            </div>
+                        </div>
+                    </section>
+                </div>
+
+                <div>
+                    <section class="panel">
+                        <div class="panel-heading">
+                            <div>
+                                <h2>Prediction Distribution</h2>
+                                <p>Score bands in this session</p>
+                            </div>
+                        </div>
+                        <div class="chart-wrap" style="height:220px">
+                            <canvas id="distributionChart"></canvas>
+                        </div>
+                    </section>
+
+                    <section class="panel" id="about">
+                        <div class="panel-heading">
+                            <div>
+                                <h2>Model Information</h2>
+                                <p>Project overview</p>
+                            </div>
+                        </div>
+
+                        <div class="metric">
+                            <div class="stat-note">Algorithm in Python backend</div>
+                            <strong>Random Forest Regressor</strong>
+                        </div>
+
+                        <div class="metric" style="margin-top:18px">
+                            <div class="stat-note">Input features</div>
+                            <strong>4 academic indicators</strong>
+                        </div>
+
+                        <div class="metric" style="margin-top:18px">
+                            <div class="stat-note">MAE / R²</div>
+                            <strong>Available after backend integration</strong>
+                        </div>
+
+                        <p class="subtitle" style="margin-top:18px;line-height:1.7">
+                            The browser demo uses an illustrative formula.
+                            To use your actual trained model, connect this
+                            dashboard to your Flask Python application.
+                        </p>
+                    </section>
+                </div>
+            </div>
+
+            <section class="panel" id="history">
+                <div class="panel-heading">
+                    <div>
+                        <h2>Recent Predictions</h2>
+                        <p>Predictions created in this browser session</p>
+                    </div>
+                    <button type="button" id="clearHistory"
+                            style="width:auto;margin:0;padding:9px 12px;
+                            background:#f0efff;color:#5b5ce2;
+                            font-size:11px;box-shadow:none">
+                        Clear History
+                    </button>
+                </div>
+
+                <div class="table-wrap">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>#</th>
+                                <th>Study Hours</th>
+                                <th>Attendance</th>
+                                <th>Previous Marks</th>
+                                <th>Sleep Hours</th>
+                                <th>Predicted Marks</th>
+                                <th>Created</th>
+                            </tr>
+                        </thead>
+                        <tbody id="historyBody">
+                            <tr>
+                                <td colspan="7"
+                                    style="text-align:center;color:#858ba5">
+                                    No predictions yet. Use the form to get started.
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <footer>
+                StudentIQ Academic Dashboard · Educational demonstration
+            </footer>
+        </main>
+    </div>
+</div>
+
+<script>
+const form = document.getElementById("predictionForm");
+const errorBox = document.getElementById("errorBox");
+const resultBox = document.getElementById("resultBox");
+const historyBody = document.getElementById("historyBody");
+
+let history = [];
+
+document.getElementById("todayDate").textContent =
+    new Date().toLocaleDateString(undefined, {
+        day: "numeric",
+        month: "short",
+        year: "numeric"
+    });
+
+const chartFont = {
+    family: "Arial",
+    size: 11
+};
+
+const performanceChart = new Chart(
+    document.getElementById("performanceChart"),
+    {
+        type: "line",
+        data: {
+            labels: ["Start", "Prediction"],
+            datasets: [{
+                label: "Predicted Marks",
+                data: [null, null],
+                borderColor: "#6263e9",
+                backgroundColor: "rgba(98,99,233,0.12)",
+                fill: true,
+                tension: 0.38,
+                pointRadius: 4,
+                pointBackgroundColor: "#6263e9"
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: { display: false }
+            },
+            scales: {
+                y: {
+                    min: 0,
+                    max: 100,
+                    grid: { color: "#f0f1f7" },
+                    ticks: { font: chartFont }
+                },
+                x: {
+                    grid: { display: false },
+                    ticks: { font: chartFont }
+                }
+            }
+        }
+    }
+);
+
+const distributionChart = new Chart(
+    document.getElementById("distributionChart"),
+    {
+        type: "doughnut",
+        data: {
+            labels: ["Below 40", "40–59", "60–79", "80–100"],
+            datasets: [{
+                data: [0, 0, 0, 0],
+                backgroundColor: [
+                    "#f1a2a2",
+                    "#f6ca83",
+                    "#8cbbf4",
+                    "#7777ed"
+                ],
+                borderWidth: 0,
+                hoverOffset: 5
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            cutout: "68%",
+            plugins: {
+                legend: {
+                    position: "bottom",
+                    labels: {
+                        boxWidth: 9,
+                        padding: 13,
+                        font: chartFont
+                    }
+                }
+            }
+        }
+    }
+);
+
+form.addEventListener("submit", function(event) {
+    event.preventDefault();
+
+    errorBox.style.display = "none";
+    resultBox.style.display = "none";
+
+    const values = {
+        study: Number(document.getElementById("study").value),
+        attendance: Number(document.getElementById("attendance").value),
+        previous: Number(document.getElementById("previous").value),
+        sleep: Number(document.getElementById("sleep").value)
+    };
+
+    const limits = {
+        study: [0, 24],
+        attendance: [0, 100],
+        previous: [0, 100],
+        sleep: [0, 24]
+    };
+
+    for (const key of Object.keys(values)) {
+        const input = document.getElementById(key);
+        const value = values[key];
+
+        if (input.value.trim() === "" ||
+            !Number.isFinite(value) ||
+            value < limits[key][0] ||
+            value > limits[key][1]) {
+            errorBox.textContent =
+                "Please enter valid values in all fields.";
+            errorBox.style.display = "block";
+            return;
+        }
+    }
+
+    // Illustrative formula only.
+    // This is NOT a prediction from student_model.pkl.
+    const estimate =
+        0.35 * values.previous +
+        2.8 * values.study +
+        0.18 * values.attendance +
+        1.2 * values.sleep - 10;
+
+    const marks = Math.max(0, Math.min(100, estimate));
+
+    const record = {
+        ...values,
+        marks: Number(marks.toFixed(2)),
+        created: new Date().toLocaleTimeString([], {
+            hour: "2-digit",
+            minute: "2-digit"
+        })
+    };
+
+    history.unshift(record);
+    renderDashboard();
+
+    document.getElementById("resultValue").textContent =
+        record.marks.toFixed(2) + "%";
+
+    let message = "Estimated score out of 100 marks.";
+
+    if (record.marks >= 80) {
+        message = "High estimated score in this demo.";
+    } else if (record.marks >= 60) {
+        message = "Moderate-to-high estimated score in this demo.";
+    } else if (record.marks >= 40) {
+        message = "Estimated score may benefit from additional support.";
+    } else {
+        message = "Consider reviewing the student's learning needs.";
+    }
+
+    document.getElementById("resultMessage").textContent = message;
+    resultBox.style.display = "block";
+});
+
+function renderDashboard() {
+    document.getElementById("totalPredictions").textContent =
+        history.length;
+
+    const average = history.length
+        ? history.reduce((sum, item) => sum + item.marks, 0) / history.length
+        : null;
+
+    document.getElementById("averageMarks").textContent =
+        average === null ? "--" : average.toFixed(1) + "%";
+
+    document.getElementById("highestMarks").textContent =
+        history.length
+        ? Math.max(...history.map(item => item.marks)).toFixed(1) + "%"
+        : "--";
+
+    performanceChart.data.labels = history.length
+        ? history.slice().reverse().map((_, i) => "Prediction " + (i + 1))
+        : ["Start", "Prediction"];
+
+    performanceChart.data.datasets[0].data = history.length
+        ? history.slice().reverse().map(item => item.marks)
+        : [null, null];
+
+    performanceChart.update();
+
+    const bands = [0, 0, 0, 0];
+
+    history.forEach(item => {
+        if (item.marks < 40) bands[0]++;
+        else if (item.marks < 60) bands[1]++;
+        else if (item.marks < 80) bands[2]++;
+        else bands[3]++;
+    });
+
+    distributionChart.data.datasets[0].data = bands;
+    distributionChart.update();
+
+    if (!history.length) {
+        historyBody.innerHTML = `
+            <tr>
+                <td colspan="7" style="text-align:center;color:#858ba5">
+                    No predictions yet. Use the form to get started.
+                </td>
+            </tr>`;
+        return;
+    }
+
+    historyBody.innerHTML = "";
+
+    history.forEach((item, index) => {
+        const row = document.createElement("tr");
+
+        [
+            index + 1,
+            item.study,
+            item.attendance + "%",
+            item.previous + "%",
+            item.sleep,
+            item.marks.toFixed(2) + "%",
+            item.created
+        ].forEach((value, cellIndex) => {
+            const cell = document.createElement("td");
+            cell.textContent = value;
+
+            if (cellIndex === 5) {
+                const status = document.createElement("span");
+                status.className = "status";
+                status.textContent = value;
+                cell.textContent = "";
+                cell.appendChild(status);
+            }
+
+            row.appendChild(cell);
+        });
+
+        historyBody.appendChild(row);
+    });
+}
+
+document.getElementById("clearHistory").addEventListener("click", () => {
+    history = [];
+    resultBox.style.display = "none";
+    renderDashboard();
+});
+
+document.querySelectorAll(".nav-item[data-section]").forEach(item => {
+    item.addEventListener("click", () => {
+        document.querySelectorAll(".nav-item").forEach(nav => {
+            nav.classList.remove("active");
+        });
+
+        item.classList.add("active");
+
+        const section = document.getElementById(item.dataset.section);
+        if (section) {
+            section.scrollIntoView({
+                behavior: "smooth",
+                block: "start"
+            });
+        }
+    });
+});
+
+document.getElementById("searchInput").addEventListener("input", event => {
+    const query = event.target.value.trim().toLowerCase();
+
+    [...historyBody.rows].forEach(row => {
+        row.style.display = row.textContent.toLowerCase().includes(query)
+            ? ""
+            : "none";
+    });
+});
+</script>
+</body>
+</html>
